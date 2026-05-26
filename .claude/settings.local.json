@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jobs)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"runserver\")"
+    ]
+  }
+}
