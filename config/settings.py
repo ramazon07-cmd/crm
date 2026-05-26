@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-r^fh(#xe57z@#1o*7-w1dlhr%5re$5it7o#f5h_4wd#ninxmu!"
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -47,7 +50,6 @@ INSTALLED_APPS = [
     "teachers",
     "subjects",
 ]
-
 
 
 MIDDLEWARE = [
@@ -85,8 +87,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
+        "NAME": BASE_DIR / os.environ.get('DB_NAME', 'db.sqlite3'),
     }
 }
 
@@ -133,6 +135,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -142,3 +150,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ]
 }
+
+
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

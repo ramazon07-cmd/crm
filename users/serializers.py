@@ -15,6 +15,27 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+    
+    def validate_email(self, value): 
+        user = self.instance
+        if User.objects.exclude(
+            pk=user.pk if user else None
+        ).filter(email=value).exists():
+            raise serializers.ValidationError(
+                "Bu email allaqachon ro'yxatdan o'tgan."
+            )
+        return value
+
+    def validate_phone_number(self, value):  
+        if value:
+            user = self.instance
+            if User.objects.exclude(
+                pk=user.pk if user else None
+            ).filter(phone_number=value).exists():
+                raise serializers.ValidationError(
+                    "Bu telefon raqam allaqachon ro'yxatdan o'tgan."
+                )
+        return value
 
     def create(self, validated_data):
         password = validated_data.pop('password')

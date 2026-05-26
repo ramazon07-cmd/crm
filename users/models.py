@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+
+phone_regex = RegexValidator( 
+    regex=r'^\+?998\d{9}$',
+    message="Telefon raqam formatda bo'lishi kerak: '+998901234567'"
+)
 
 
 class User(AbstractUser):
@@ -32,6 +39,7 @@ class User(AbstractUser):
     )
     phone_number = models.CharField(
         _("phone number"),
+        validators=[phone_regex], 
         max_length=13,
         blank=True,
         null=True,
@@ -57,6 +65,17 @@ class User(AbstractUser):
         verbose_name = _("user")
         verbose_name_plural = _("users")
         ordering = ["-created_at"]
+
+    def clean(self):
+        super().clean()
+        if self.first_name and len(self.first_name.strip()) < 2:
+            raise ValidationError({
+                'first_name': "Ism kamida 2 ta harf bo'lishi kerak."
+            })
+        if self.last_name and len(self.last_name.strip()) < 2:
+            raise ValidationError({
+                'last_name': "Familiya kamida 2 ta harf bo'lishi kerak."
+            })
 
     def __str__(self):
         return self.email
