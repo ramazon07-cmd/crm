@@ -11,6 +11,8 @@ from users.views import UserViewSet
 from students.views import StudentViewSet
 from subjects.views import SubjectViewSet
 from teachers.views import TeacherViewSet
+from grades.views import GradeViewSet
+from payments.views import PaymentViewSet
 
 # Router
 router = DefaultRouter()
@@ -18,6 +20,8 @@ router.register("users",    UserViewSet,    basename="user")
 router.register("students", StudentViewSet, basename="student")
 router.register("subjects", SubjectViewSet, basename="subject")
 router.register("teachers", TeacherViewSet, basename="teacher")
+router.register("grades", GradeViewSet, basename="grade")
+router.register("payments", PaymentViewSet, basename="payment")
 
 # ✅ TO'LIQ SWAGGER KONFIGURATSIYA
 schema = get_schema_view(
@@ -36,6 +40,9 @@ Authorization: Token <your_token_here>
 - **Students** — Talabalar CRUD
 - **Teachers** — O'qituvchilar CRUD  
 - **Subjects** — Fanlar CRUD
+- **Grades** — Baho va reytinglar CRUD
+- **Payments** — To'lovlar CRUD
+
         """
     ),
     public=True,
