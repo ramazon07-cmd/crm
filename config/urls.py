@@ -36,17 +36,7 @@ Authorization: Token <your_token_here>
 - **Students** — Talabalar CRUD
 - **Teachers** — O'qituvchilar CRUD  
 - **Subjects** — Fanlar CRUD
-        """,
-        terms_of_service="https://crm.uz/terms/",
-        contact=openapi.Contact(
-            name="CRM Support",
-            email="admin@crm.uz",
-            url="https://crm.uz/support"
-        ),
-        license=openapi.License(
-            name="MIT License",
-            url="https://opensource.org/licenses/MIT"
-        ),
+        """
     ),
     public=True,
     permission_classes=[AllowAny],
