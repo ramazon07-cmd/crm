@@ -1,20 +1,23 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+
 
 class Student(models.Model):
-    full_name = models.CharField(max_length=200)
-    age = models.IntegerField()
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('graduated', 'Graduated'),
+    ]
+
+    full_name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20, unique=True)
+    # TODO: Replace with ForeignKey('groups.Group', ...) when groups app exists
+    group_id = models.IntegerField(null=True, blank=True)
+    monthly_fee = models.DecimalField(max_digits=12, decimal_places=2)
+    start_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    notes = models.TextField(blank=True, null=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.full_name
-
-    def clean(self):  # ✅ QO'SHILDI
-        super().clean()
-        if self.age < 5 or self.age > 100:
-            raise ValidationError({
-                'age': "Yosh 5 va 100 orasida bo'lishi kerak."
-            })
-        if len(self.full_name.strip()) < 3:
-            raise ValidationError({
-                'full_name': "To'liq ism kamida 3 ta harf bo'lishi kerak."
-            })
