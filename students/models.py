@@ -10,8 +10,13 @@ class Student(models.Model):
 
     full_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=20, unique=True)
-    # TODO: Replace with ForeignKey('groups.Group', ...) when groups app exists
-    group_id = models.IntegerField(null=True, blank=True)
+    group = models.ForeignKey(
+        'groups.Group',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='students',
+    )
     monthly_fee = models.DecimalField(max_digits=12, decimal_places=2)
     start_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')

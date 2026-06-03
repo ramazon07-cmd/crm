@@ -35,14 +35,11 @@ class StudentViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-             if 'phone' in serializer.errors:
+            if 'phone' in serializer.errors:
                 phone_errors = serializer.errors['phone']
-                if any(
-                    'DUPLICATE_PHONE' in str(e) or 'already exists' in str(e)
-                    for e in phone_errors
-                ):
+                if any('DUPLICATE_PHONE' in str(e) or 'already exists' in str(e) for e in phone_errors):
                     return self._duplicate_phone_response()
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # ← bu yerda group 9999 → 400
         try:
             self.perform_create(serializer)
         except IntegrityError:
