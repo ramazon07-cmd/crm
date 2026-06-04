@@ -14,6 +14,7 @@ from teachers.views import TeacherViewSet
 from groups.views import GroupViewSet
 from grades.views import GradeViewSet
 from payments.views import PaymentViewSet
+from attendance.views import AttendanceViewSet, HolidayViewSet
 
 # Router
 router = DefaultRouter()
@@ -24,6 +25,8 @@ router.register("teachers", TeacherViewSet, basename="teacher")
 router.register("groups", GroupViewSet, basename="group")
 router.register("grades", GradeViewSet, basename="grade")
 router.register("payments", PaymentViewSet, basename="payment")
+router.register("attendance", AttendanceViewSet, basename="attendance")
+router.register("holidays", HolidayViewSet, basename="holiday")
 
 # ✅ TO'LIQ SWAGGER KONFIGURATSIYA
 schema = get_schema_view(
