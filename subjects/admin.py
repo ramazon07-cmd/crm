@@ -4,6 +4,6 @@ from .models import Subject
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title']
+    list_display = ['title', 'created_at']
     search_fields = ['title']
-    readonly_fields = ['id']
+    list_filter = ['created_at']
