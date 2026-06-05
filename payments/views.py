@@ -14,6 +14,7 @@ from attendance.models import Attendance
 from .models import Payment
 from .serializers import PaymentSerializer, PaymentListSerializer
 from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin
+from users.utils import create_audit_log
 
 
 class PaymentViewSet(ModelViewSet):
@@ -62,7 +63,12 @@ class PaymentViewSet(ModelViewSet):
         return PaymentSerializer
 
     def perform_create(self, serializer):
-        serializer.save(received_by=self.request.user)
+        instance = serializer.save(received_by=self.request.user)
+        create_audit_log(self.request, 'CREATE', instance)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        create_audit_log(self.request, 'UPDATE', instance)
 
     def _duplicate_response(self):
         return Response(

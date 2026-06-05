@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 from .models import Subject
 from .serializers import SubjectSerializer, SubjectListSerializer
 from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin, IsTeacherOrAbove
+from users.utils import create_audit_log
 
 
 class SubjectViewSet(ModelViewSet):
@@ -60,6 +61,7 @@ class SubjectViewSet(ModelViewSet):
             self.perform_create(serializer)
         except IntegrityError:
             return self._duplicate_response()
+        create_audit_log(self.request, 'CREATE', serializer.instance)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -72,13 +74,15 @@ class SubjectViewSet(ModelViewSet):
                 return self._duplicate_response()
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
-            serializer.save()
+            instance = serializer.save()
         except IntegrityError:
             return self._duplicate_response()
+        create_audit_log(self.request, 'UPDATE', instance)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        create_audit_log(request, 'DELETE', instance)
         instance.deleted_at = timezone.now()
         instance.save(update_fields=['deleted_at'])
-        return Response(status=status.HTTP_204_NO_CONTENT) 
+        return Response(status=status.HTTP_204_NO_CONTENT)

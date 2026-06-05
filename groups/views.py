@@ -10,6 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from .models import Group
 from .serializers import GroupListSerializer, GroupSerializer
 from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin
+from users.utils import create_audit_log
 
 
 class GroupViewSet(ModelViewSet):
@@ -56,6 +57,7 @@ class GroupViewSet(ModelViewSet):
             self.perform_create(serializer)
         except IntegrityError:
             return self._duplicate_response('name')
+        create_audit_log(self.request, 'CREATE', serializer.instance)
         headers = self.get_success_headers(serializer.data)
         return Response(
             serializer.data,
@@ -75,10 +77,12 @@ class GroupViewSet(ModelViewSet):
             self.perform_update(serializer)
         except IntegrityError:
             return self._duplicate_response('name')
+        create_audit_log(self.request, 'UPDATE', serializer.instance)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        create_audit_log(request, 'DELETE', instance)
         instance.deleted_at = timezone.now()
         instance.save(update_fields=['deleted_at'])
         return Response(status=status.HTTP_204_NO_CONTENT)

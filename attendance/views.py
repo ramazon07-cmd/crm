@@ -23,6 +23,7 @@ from .serializers import (
     HolidaySerializer,
 )
 from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin, IsTeacherOrAbove
+from users.utils import create_audit_log
 
 
 class AttendanceViewSet(ModelViewSet):
@@ -56,7 +57,8 @@ class AttendanceViewSet(ModelViewSet):
         return AttendanceSerializer
 
     def perform_create(self, serializer):
-        serializer.save(marked_by=self.request.user)
+        instance = serializer.save(marked_by=self.request.user)
+        create_audit_log(self.request, 'CREATE', instance)
 
     def _duplicate_entry_response(self):
         return Response(
@@ -142,9 +144,10 @@ class AttendanceViewSet(ModelViewSet):
                 return restricted
 
         try:
-            serializer.save()
+            instance = serializer.save()
         except IntegrityError:
             return self._duplicate_entry_response()
+        create_audit_log(self.request, 'UPDATE', instance)
         return Response(serializer.data)
 
     @swagger_auto_schema(

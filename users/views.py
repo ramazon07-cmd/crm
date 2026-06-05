@@ -1,4 +1,4 @@
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -11,9 +11,11 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
-from .models import User
-from .serializers import UserSerializer, LoginSerializer, UserDetailSerializer
+from .models import User, AuditLog
+from .serializers import UserSerializer, LoginSerializer, UserDetailSerializer, AuditLogSerializer
+from utils.permissions import IsSuperAdmin
 
 
 class UserViewSet(GenericViewSet):
@@ -101,3 +103,46 @@ class UserViewSet(GenericViewSet):
             {'message': 'Logged out'},
             status=HTTP_200_OK
         )
+
+
+class AuditLogViewSet(ReadOnlyModelViewSet):
+    queryset = AuditLog.objects.select_related('user').all()
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('model_name', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                enum=['Student', 'Teacher', 'Payment', 'Attendance', 'Group', 'Subject']),
+            openapi.Parameter('action', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                enum=['CREATE', 'UPDATE', 'DELETE']),
+            openapi.Parameter('user_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
+            openapi.Parameter('object_id', openapi.IN_QUERY, type=openapi.TYPE_INTEGER),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        model_name = self.request.query_params.get('model_name')
+        action_type = self.request.query_params.get('action')
+        user_id = self.request.query_params.get('user_id')
+        object_id = self.request.query_params.get('object_id')
+
+        if model_name:
+            queryset = queryset.filter(model_name=model_name)
+        if action_type:
+            queryset = queryset.filter(action=action_type)
+        if user_id:
+            try:
+                queryset = queryset.filter(user_id=int(user_id))
+            except ValueError:
+                pass
+        if object_id:
+            try:
+                queryset = queryset.filter(object_id=int(object_id))
+            except ValueError:
+                pass
+
+        return queryset

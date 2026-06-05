@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, AuditLog
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -80,3 +80,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'is_verified', 'created_at'
         ]
         read_only_fields = ['id', 'is_verified', 'created_at']
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    user_email = serializers.CharField(source='user.email', read_only=True)
+
+    class Meta:
+        model = AuditLog
+        fields = [
+            'id', 'user', 'user_email', 'action',
+            'model_name', 'object_id', 'object_repr',
+            'changes', 'ip_address', 'timestamp'
+        ]
+        read_only_fields = fields

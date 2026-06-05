@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users.views import UserViewSet
+from users.views import UserViewSet, AuditLogViewSet
 from students.views import StudentViewSet
 from subjects.views import SubjectViewSet
 from teachers.views import TeacherViewSet
@@ -27,6 +27,7 @@ router.register("grades", GradeViewSet, basename="grade")
 router.register("payments", PaymentViewSet, basename="payment")
 router.register("attendance", AttendanceViewSet, basename="attendance")
 router.register("holidays", HolidayViewSet, basename="holiday")
+router.register("audit-logs", AuditLogViewSet, basename="audit-log")
 
 # ✅ TO'LIQ SWAGGER KONFIGURATSIYA
 schema = get_schema_view(
