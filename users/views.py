@@ -33,6 +33,19 @@ class UserViewSet(GenericViewSet):
     def register(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            requested_role = request.data.get('role', 'ADMIN')
+            
+            # SUPER_ADMIN faqat boshqa SUPER_ADMIN yarata oladi
+            # LEKIN birinchi SUPER_ADMIN bo'lmasa — ruxsat ber
+            if requested_role == 'SUPER_ADMIN':
+                super_admin_exists = User.objects.filter(role='SUPER_ADMIN').exists()
+                if super_admin_exists:
+                    # Boshqa SUPER_ADMIN bor — faqat authenticated SUPER_ADMIN yarata oladi
+                    if not request.user.is_authenticated or request.user.role != 'SUPER_ADMIN':
+                        requested_role = 'ADMIN'
+                # Agar SUPER_ADMIN yo'q bo'lsa — birinchisini yaratishga ruxsat
+
+            serializer.validated_data['role'] = requested_role
             user = serializer.save()
             token, _ = Token.objects.get_or_create(user=user)
             return Response({

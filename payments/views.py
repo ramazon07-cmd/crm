@@ -13,11 +13,17 @@ from attendance.views import _get_workdays_for_month
 from attendance.models import Attendance
 from .models import Payment
 from .serializers import PaymentSerializer, PaymentListSerializer
+from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin
 
 
 class PaymentViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Payment.objects.all()
+
+    def get_permissions(self):
+        if self.action == 'report':
+            return [IsSuperAdmin()]
+        return [IsAdminOrSuperAdmin()]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['student__full_name']
     ordering_fields = ['created_at', 'payment_date', 'month', 'year']

@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import Subject
 from .serializers import SubjectSerializer, SubjectListSerializer
+from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin, IsTeacherOrAbove
 
 
 class SubjectViewSet(ModelViewSet):
@@ -16,6 +17,11 @@ class SubjectViewSet(ModelViewSet):
     search_fields = ['title']
     ordering_fields = ['created_at', 'title']
     ordering = ['-created_at']
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return [IsTeacherOrAbove()]
+        return [IsAdminOrSuperAdmin()]
 
     def get_queryset(self):
         return Subject.objects.filter(deleted_at__isnull=True).order_by('-created_at')

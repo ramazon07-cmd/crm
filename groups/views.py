@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import Group
 from .serializers import GroupListSerializer, GroupSerializer
+from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin
 
 
 class GroupViewSet(ModelViewSet):
@@ -17,6 +18,11 @@ class GroupViewSet(ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name', 'teacher__full_name']
     ordering_fields = ['created_at']
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            return [IsSuperAdmin()]
+        return [IsAdminOrSuperAdmin()]
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

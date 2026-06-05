@@ -22,11 +22,17 @@ from .serializers import (
     BulkAttendanceSerializer,
     HolidaySerializer,
 )
+from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin, IsTeacherOrAbove
 
 
 class AttendanceViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Attendance.objects.all()
+
+    def get_permissions(self):
+        if self.action in ('create', 'bulk'):
+            return [IsTeacherOrAbove()]
+        return [IsAdminOrSuperAdmin()]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['student__full_name', 'group__name']
     ordering_fields = ['date', 'created_at']

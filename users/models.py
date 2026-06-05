@@ -51,6 +51,16 @@ class User(AbstractUser):
         blank=True,
         null=True,
     )
+    ROLE_CHOICES = [
+        ('SUPER_ADMIN', 'Super Admin'),
+        ('ADMIN', 'Admin'),
+        ('TEACHER', 'Teacher'),
+    ]
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='ADMIN',
+    )
     is_verified = models.BooleanField(
         _("is verified"),
         default=False,

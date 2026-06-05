@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .models import Teacher
 from .serializers import TeacherListSerializer, TeacherSerializer
+from utils.permissions import IsSuperAdmin, IsAdminOrSuperAdmin
 
 
 class TeacherViewSet(ModelViewSet):
@@ -17,6 +18,11 @@ class TeacherViewSet(ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['full_name', 'phone', 'subject']
     ordering_fields = ['created_at']
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            return [IsSuperAdmin()]
+        return [IsAdminOrSuperAdmin()]
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

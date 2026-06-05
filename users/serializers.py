@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username',
             'first_name', 'last_name',
-            'phone_number', 'password'
+            'phone_number', 'password', 'role'
         ]
         extra_kwargs = {
             'password': {'write_only': True}
@@ -76,7 +76,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username',
             'first_name', 'last_name', 'full_name',
-            'phone_number', 'avatar',
-            'is_verified', 'created_at'  # ✅ date_joined → created_at
+            'phone_number', 'avatar', 'role',
+            'is_verified', 'created_at'
         ]
         read_only_fields = ['id', 'is_verified', 'created_at']
