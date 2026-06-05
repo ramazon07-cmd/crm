@@ -14,7 +14,7 @@ from teachers.views import TeacherViewSet
 from groups.views import GroupViewSet
 from grades.views import GradeViewSet
 from payments.views import PaymentViewSet
-from attendance.views import AttendanceViewSet, HolidayViewSet
+from attendance.views import AttendanceViewSet, HolidayViewSet, WorkdaysView
 
 # Router
 router = DefaultRouter()
@@ -60,6 +60,7 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("swagger/", schema.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("redoc/",   schema.with_ui("redoc",   cache_timeout=0), name="schema-redoc"),
+    path("api/workdays/", WorkdaysView.as_view(), name="workdays"),
     path("swagger.json", schema.without_ui(cache_timeout=0), name="schema-json"),
 ]
 

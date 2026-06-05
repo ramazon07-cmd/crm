@@ -10,13 +10,7 @@ class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = [
-            'id',
-            'student',
-            'group',
-            'date',
-            'status',
-            'marked_by',
-            'note',
+            'id', 'student', 'group', 'date', 'status', 'marked_by', 'note',
             'created_at',
         ]
         read_only_fields = ['id', 'marked_by', 'created_at']
@@ -45,14 +39,51 @@ class AttendanceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
         fields = [
-            'id',
-            'student',
-            'group',
-            'date',
-            'status',
-            'note',
-            'created_at',
+            'id', 'student', 'group', 'date', 'status', 'note', 'created_at',
         ]
+
+
+class BulkAttendanceRecordSerializer(serializers.Serializer):
+    student_id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=[s[0] for s in Attendance.STATUS_CHOICES])
+    note = serializers.CharField(max_length=200, required=False, default='')
+
+
+class BulkAttendanceSerializer(serializers.Serializer):
+    group_id = serializers.IntegerField()
+    date = serializers.DateField()
+    records = BulkAttendanceRecordSerializer(many=True)
+
+    def validate_date(self, value):
+        if value > timezone.localdate():
+            raise serializers.ValidationError('Date cannot be in the future.')
+        return value
+
+    def validate_records(self, value):
+        if not value:
+            raise serializers.ValidationError('At least one record is required.')
+        return value
+
+    def validate_group_id(self, value):
+        from groups.models import Group
+        try:
+            Group.objects.get(id=value)
+        except Group.DoesNotExist:
+            raise serializers.ValidationError('Group not found.')
+        return value
+
+    def validate(self, data):
+        # Validate student_ids exist and belong to the group
+        from students.models import Student
+        student_ids = [r['student_id'] for r in data['records']]
+        students = Student.objects.filter(id__in=student_ids, group_id=data['group_id'])
+        found_ids = {s.id for s in students}
+        missing = set(student_ids) - found_ids
+        if missing:
+            raise serializers.ValidationError(
+                f'Students {missing} not found in group {data["group_id"]}.'
+            )
+        return data
 
 
 class HolidaySerializer(serializers.ModelSerializer):
